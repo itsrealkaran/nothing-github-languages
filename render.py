@@ -1,4 +1,4 @@
-"""Language card. Each language has its own share bar. Ten languages, no color key."""
+"""Language card. A bar shows each share. The lead language is the figure."""
 
 import sys
 from pathlib import Path
@@ -14,12 +14,12 @@ def render(mode, size, data):
     colors = theme(mode)
     rows = data["languages"][:10] or [["No languages", 0]]
     if size == "mini":
-        return _lines(mode, colors, data, rows[:5], 220, 1, mark=6, margin=14)
+        return _mini(mode, colors, data, rows[:5])
     if size == "compact":
-        return _lines(mode, colors, data, rows, 495, 2)
+        return _columns(mode, colors, data, rows)
     if size == "wide":
-        return _board(mode, colors, data, rows, 896, 5)
-    return _board(mode, colors, data, rows, 495, 5)
+        return _lead(mode, colors, data, rows, 896, 240)
+    return _lead(mode, colors, data, rows, 495, 248)
 
 
 def _pct(share):
@@ -33,62 +33,88 @@ def _share_bar(x, y, track, share, colors):
     if share and filled < 3:
         filled = 3
     return (
-        f'<rect x="{x}" y="{y}" width="{track}" height="6" fill="{colors["rule"]}"/>'
-        f'<rect x="{x}" y="{y}" width="{filled:.1f}" height="6" fill="{colors["figure"]}"/>'
+        f'<rect x="{x:.1f}" y="{y:.1f}" width="{track:.1f}" height="6" fill="{colors["rule"]}"/>'
+        f'<rect x="{x:.1f}" y="{y:.1f}" width="{filled:.1f}" height="6" fill="{colors["figure"]}"/>'
     )
 
 
-def _lines(mode, colors, data, rows, width, columns, mark=8, margin=20):
-    """Columns of languages. The bar under each name is that language's own share."""
-    rows = rows or [["No languages", 0]]
-    per = (len(rows) + columns - 1) // columns
-    narrow = width < 300
-    gap = 16
-    track = (width - margin * 2 - gap * (columns - 1)) / columns
-    pitch = 34 if narrow else 38
-    top = 52 if narrow else 68
-    height = top + per * pitch + 8
-    name, _ = dots(
-        "LANGUAGES",
-        margin + 14,
-        12 if narrow else 16,
-        colors["fg"],
-        scale=1.15 if narrow else 1.8,
-    )
-    parts = [open_svg(mode, width, height, f"{data['login']} languages", mark=mark, margin=margin), name]
+def _mini(mode, colors, data, rows):
+    lead, share = rows[0]
+    rest = rows[1:]
+    name, _ = dots("LANGUAGES", 28, 12, colors["fg"], scale=1.15)
+    parts = [
+        open_svg(mode, 220, 228, f"{data['login']} languages", mark=6, margin=14),
+        name,
+        label(14, 78, _pct(share).rstrip("%"), colors["figure"], 28, -0.8),
+        label(14, 96, lead, colors["muted"], 11, 0.2),
+        _share_bar(14, 106, 192, share, colors),
+    ]
+    for index, (lang, part) in enumerate(rest):
+        y = 138 + index * 22
+        parts.append(label(14, y, lang, colors["fg"], 11, 0.05))
+        parts.append(label(206, y, _pct(part), colors["figure"], 11, 0, anchor="end"))
+        parts.append(_share_bar(118, y - 9, 48, part, colors))
+    parts.append("</svg>")
+    return "\n".join(parts)
+
+
+def _columns(mode, colors, data, rows):
+    """Ten languages, two columns. The bar under each name is that language's share."""
+    margin = 20
+    gap = 28
+    width = 495
+    track = (width - margin * 2 - gap) / 2
+    per = 5
+    pitch = 46
+    top = 68
+    height = top + per * pitch + 6
+    name, _ = dots("LANGUAGES", margin + 16, 16, colors["fg"], scale=1.8)
+    parts = [open_svg(mode, width, height, f"{data['login']} languages"), name]
     for index, (lang, share) in enumerate(rows):
         column = index // per
         row = index % per
         x = margin + column * (track + gap)
         y = top + row * pitch
-        parts.append(label(x, y, lang, colors["fg"], 12 if narrow else 13, 0.05))
-        parts.append(label(x + track, y, _pct(share), colors["figure"], 12 if narrow else 13, 0.05, anchor="end"))
+        parts.append(label(x, y, lang, colors["fg"], 13, 0.05))
+        parts.append(label(x + track, y, _pct(share), colors["figure"], 13, 0, anchor="end"))
         parts.append(_share_bar(x, y + 8, track, share, colors))
     parts.append("</svg>")
     return "\n".join(parts)
 
 
-def _board(mode, colors, data, rows, width, columns):
-    """Five languages on each row. Wide is the same board with longer bars."""
-    rows = (rows or [["No languages", 0]])[:10]
-    margin = 20
-    gap = 18 if width > 600 else 12
-    track = (width - margin * 2 - gap * (columns - 1)) / columns
-    per = (len(rows) + columns - 1) // columns
-    pitch = 78 if width > 600 else 64
-    top = 72
-    height = top + per * pitch + 4
-    name, _ = dots("LANGUAGES", margin + 16, 16, colors["fg"], scale=1.8)
-    parts = [open_svg(mode, width, height, f"{data['login']} languages"), name]
-    pct_size = 22 if width > 600 else 16
-    for index, (lang, share) in enumerate(rows):
-        column = index % columns
-        row = index // columns
-        x = margin + column * (track + gap)
+def _lead(mode, colors, data, rows, width, height):
+    """The first language is the figure. The rest sit in rows beside it."""
+    lead, share = rows[0]
+    rest = rows[1:]
+    wide = width > 600
+    name, _ = dots("LANGUAGES", 36, 16, colors["fg"], scale=1.8)
+    number = 52 if wide else 40
+    parts = [
+        open_svg(mode, width, height, f"{data['login']} languages"),
+        name,
+        label(20, 118 if wide else 112, _pct(share).rstrip("%"), colors["figure"], number, -1.2),
+        label(20, 146 if wide else 136, lead, colors["muted"], 13, 0.2),
+        _share_bar(20, 164 if wide else 152, 284 if wide else 160, share, colors),
+    ]
+    columns = 2 if wide else 1
+    per = (len(rest) + columns - 1) // columns
+    origin = 320 if wide else 196
+    gutter = 48 if wide else 0
+    span = (width - origin - 20 - gutter * (columns - 1)) / columns
+    pitch = 32 if wide else 18
+    top = 78
+    for index, (lang, part) in enumerate(rest):
+        column = index // per
+        row = index % per
+        x = origin + column * (span + gutter)
         y = top + row * pitch
-        parts.append(label(x, y, lang, colors["fg"], 13 if width > 600 else 12, 0.05))
-        parts.append(label(x, y + (28 if width > 600 else 22), _pct(share), colors["figure"], pct_size, -0.4))
-        parts.append(_share_bar(x, y + (40 if width > 600 else 32), track, share, colors))
+        parts.append(
+            f'<rect x="{x:.1f}" y="{y - 10}" width="5" height="5" fill="{colors["mark"]}"/>'
+        )
+        parts.append(label(x + 12, y, lang, colors["fg"], 13, 0.05))
+        if wide:
+            parts.append(_share_bar(x + 118, y - 11, 72, part, colors))
+        parts.append(label(x + span - 8, y, _pct(part), colors["figure"], 13, 0, anchor="end"))
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -114,7 +140,7 @@ def main():
     lines = [
         f"# {login}",
         "",
-        "Each bar is that language's own share. Mini lists five. Compact lists ten in two columns. Regular and wide put five languages on each of two rows.",
+        "The first language is the figure, and a bar shows its share. Compact lists ten languages in two columns. Mini lists five.",
         "",
     ]
     for mode in MODES:
