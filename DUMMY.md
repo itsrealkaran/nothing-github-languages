@@ -1,6 +1,6 @@
 # itsrealkaran
 
-Mini and compact are one share bar and a language list, with no footer. Regular lists each language on its own bar. Wide leads with the largest share.
+Each bar is that language's own share. Mini lists five. Compact lists ten in two columns. Regular and wide put five languages on each of two rows.
 
 ## classic
 
