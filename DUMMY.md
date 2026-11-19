@@ -1,6 +1,6 @@
 # itsrealkaran
 
-Mini lists three languages, compact lists four, and regular and wide list eight. Each bar is that language's share of the code.
+Mini and compact are one share bar and a language list, with no footer. Regular lists each language on its own bar. Wide leads with the largest share.
 
 ## classic
 
