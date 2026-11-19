@@ -94,10 +94,20 @@ def owned_repos(login):
 def languages(login):
     repos, _own = owned_repos(login)
     totals = Counter()
+    public = Counter()
     for repo in repos:
-        totals.update(_gh([f"repos/{repo['full_name']}/languages"]))
+        stats = _gh([f"repos/{repo['full_name']}/languages"])
+        totals.update(stats)
+        if not repo.get("private"):
+            public.update(stats)
     grand = sum(totals.values()) or 1
-    rows = [(name, round(100 * amount / grand, 1)) for name, amount in totals.most_common(8)]
+    rows = []
+    for name, amount in totals.most_common():
+        if public.get(name, 0) <= 0:
+            continue
+        rows.append((name, round(100 * amount / grand, 2)))
+        if len(rows) == 10:
+            break
     return {"languages": rows or [["No languages", 0]]}
 
 
