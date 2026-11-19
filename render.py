@@ -1,4 +1,4 @@
-"""Language card. Compact is one language. Regular is the list. Wide splits them."""
+"""Language card. Every size lists languages. Each bar is that language's share of the code."""
 
 import sys
 from pathlib import Path
@@ -13,77 +13,69 @@ ROOT = Path(__file__).resolve().parent
 def render(mode, size, data):
     colors = theme(mode)
     if size == "mini":
-        return _mini(mode, colors, data)
+        return _rows(mode, colors, data, data["languages"][:3], 220, 16, 188, mark=6, margin=14)
     if size == "compact":
-        return _compact(mode, colors, data)
+        return _rows(mode, colors, data, data["languages"][:4], 495, 20, 250)
     if size == "wide":
         return _wide(mode, colors, data)
-    return _regular(mode, colors, data)
+    return _rows(mode, colors, data, data["languages"], 495, 20, 250)
 
 
-def _mini(mode, colors, data):
-    lang, share = data["languages"][0]
-    name, _ = dots("LANGUAGES", 28, 12, colors["fg"], scale=1.15)
-    return "\n".join([
-        open_svg(mode, 220, 148, f"{data['login']} languages", mark=6, margin=14),
-        name,
-        label(16, 100, f"{share:.0f}%", colors["figure"], 32, -0.8),
-        label(16, 126, lang, colors["fg"], 14, 0.1),
-        "</svg>",
-    ])
+def _share_bar(x, y, track, share, colors):
+    filled = track * (share / 100) if share else 0
+    if share and filled < 3:
+        filled = 3
+    return (
+        f'<rect x="{x}" y="{y}" width="{track}" height="6" fill="{colors["rule"]}"/>'
+        f'<rect x="{x}" y="{y}" width="{filled:.1f}" height="6" fill="{colors["figure"]}"/>'
+    )
 
 
-def _compact(mode, colors, data):
-    lang, share = data["languages"][0]
-    name, _ = dots("LANGUAGES", 40, 16, colors["fg"], scale=1.8)
-    return "\n".join([
-        open_svg(mode, 495, 132, f"{data['login']} languages"),
-        name,
-        label(20, 100, lang, colors["figure"], 28, -0.4),
-        label(340, 100, f"{share:.0f}%", colors["fg"], 28, -0.4),
-        label(20, 120, f"@{data['login']}", colors["muted"], 12, 0.3),
-        "</svg>",
-    ])
-
-
-def _regular(mode, colors, data):
-    rows = data["languages"]
-    height = 78 + len(rows) * 28 + 28
-    name, _ = dots("LANGUAGES", 40, 16, colors["fg"], scale=1.8)
-    parts = [open_svg(mode, 495, height, f"{data['login']} languages"), name]
-    top = rows[0][1] or 1
+def _rows(mode, colors, data, rows, width, pad, track, mark=8, margin=20):
+    rows = rows or [["No languages", 0]]
+    narrow = width < 300
+    pitch = 36 if narrow else 28
+    height = 64 + len(rows) * pitch + (30 if narrow else 22)
+    title_scale = 1.15 if narrow else 1.8
+    name, _ = dots("LANGUAGES", margin + 16, 12 if narrow else 16, colors["fg"], scale=title_scale)
+    parts = [open_svg(mode, width, height, f"{data['login']} languages", mark=mark, margin=margin), name]
     for index, (lang, share) in enumerate(rows):
-        y = 78 + index * 28
-        bar = max(4, 250 * (share / top))
-        parts.append(label(20, y, lang, colors["fg"], 13, 0.1))
-        parts.append(label(150, y, f"{share:.1f}%", colors["muted"], 12, 0.2))
-        parts.append(f'<rect x="220" y="{y - 10}" width="250" height="6" fill="{colors["rule"]}"/>')
-        parts.append(f'<rect x="220" y="{y - 10}" width="{bar:.1f}" height="6" fill="{colors["figure"]}"/>')
-    parts.append(label(20, height - 16, f"@{data['login']} · forks excluded", colors["muted"], 12, 0.4))
+        y = 72 + index * pitch
+        parts.append(label(pad, y, lang, colors["fg"], 13, 0.1))
+        if narrow:
+            parts.append(label(width - pad, y, f"{share:.1f}%", colors["figure"], 13, 0.1, anchor="end"))
+            parts.append(_share_bar(pad, y + 6, width - pad * 2, share, colors))
+        else:
+            bar_x = width - pad - track
+            parts.append(label(bar_x - 12, y, f"{share:.1f}%", colors["muted"], 12, 0.2, anchor="end"))
+            parts.append(_share_bar(bar_x, y - 10, track, share, colors))
+    footer = f"@{data['login']}" if narrow else f"@{data['login']} · forks excluded"
+    parts.append(label(pad, height - 14, footer, colors["muted"], 11, 0.3))
     parts.append("</svg>")
     return "\n".join(parts)
 
 
 def _wide(mode, colors, data):
-    rows = data["languages"]
+    rows = data["languages"] or [["No languages", 0]]
     lead, share = rows[0]
     name, _ = dots("LANGUAGES", 40, 16, colors["fg"], scale=1.8)
     parts = [
-        open_svg(mode, 896, 240, f"{data['login']} languages"),
+        open_svg(mode, 896, 268, f"{data['login']} languages"),
         name,
-        label(20, 130, f"{share:.0f}%", colors["figure"], 64, -1.5),
-        label(20, 160, lead, colors["fg"], 18, 0.2),
-        label(20, 188, "of the code", colors["muted"], 13, 0.4),
+        label(20, 118, f"{share:.0f}%", colors["figure"], 48, -1),
+        label(20, 146, lead, colors["fg"], 16, 0.2),
+        _share_bar(20, 164, 250, share, colors),
+        label(20, 188, "of the code", colors["muted"], 12, 0.3),
     ]
-    rest = rows[1:] or [["—", 0]]
-    top = rows[0][1] or 1
+    rest = rows[1:]
     for index, (lang, part) in enumerate(rest):
-        y = 90 + index * 32
-        bar = max(4, 220 * (part / top))
-        parts.append(label(360, y, lang, colors["fg"], 14, 0.1))
-        parts.append(label(530, y, f"{part:.1f}%", colors["muted"], 13, 0.2))
-        parts.append(f'<rect x="610" y="{y - 11}" width="250" height="6" fill="{colors["rule"]}"/>')
-        parts.append(f'<rect x="610" y="{y - 11}" width="{bar:.1f}" height="6" fill="{colors["figure"]}"/>')
+        column = index // 4
+        row = index % 4
+        x = 310 + column * 290
+        y = 92 + row * 36
+        parts.append(label(x, y, lang, colors["fg"], 13, 0.1))
+        parts.append(label(x + 180, y, f"{part:.1f}%", colors["muted"], 12, 0.2, anchor="end"))
+        parts.append(_share_bar(x, y + 8, 180, part, colors))
     parts.append("</svg>")
     return "\n".join(parts)
 
@@ -106,7 +98,12 @@ def main():
     data["login"] = login
     out = ROOT / "dist" / login
     out.mkdir(parents=True, exist_ok=True)
-    lines = [f"# {login}", "", "Compact is one language. Regular is the list. Wide splits the lead language out.", ""]
+    lines = [
+        f"# {login}",
+        "",
+        "Mini lists three languages, compact lists four, and regular and wide list eight. Each bar is that language's share of the code.",
+        "",
+    ]
     for mode in MODES:
         lines += [f"## {mode}", ""]
         for size in SIZES:
