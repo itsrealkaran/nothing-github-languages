@@ -10,7 +10,7 @@ from urllib.parse import parse_qs, urlparse
 from draw import draw
 
 CARD = "languages"
-GITHUB = os.environ.get("GITHUB_REDIRECT", "https://github.com/itsrealkaran")
+GITHUB = os.environ.get("GITHUB_REDIRECT", "https://github.com/itsrealkaran/nothing-github-languages")
 TTL = int(os.environ.get("CARD_CACHE_SECONDS", "3600"))
 _lock = threading.Lock()
 _cache = {}
