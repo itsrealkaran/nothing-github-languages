@@ -1,6 +1,6 @@
 # itsrealkaran
 
-Each bar is that language's own share. Mini lists five. Compact lists ten in two columns. Regular and wide put five languages on each of two rows.
+The first language is the figure, and a bar shows its share. Compact lists ten languages in two columns. Mini lists five.
 
 ## classic
 
