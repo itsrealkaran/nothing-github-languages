@@ -1,6 +1,6 @@
 # itsrealkaran
 
-Compact is one language. Regular is the list. Wide splits the lead language out.
+Mini lists three languages, compact lists four, and regular and wide list eight. Each bar is that language's share of the code.
 
 ## classic
 
