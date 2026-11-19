@@ -120,7 +120,7 @@ def _lead(mode, colors, data, rows, width, height):
 
 
 def _variant(card, login, mode, size, filename):
-    url = f"https://github.com/itsrealkaran/{card}?username={login}&theme={mode}&size={size}"
+    url = f"https://github.com/itsrealkaran/nothing-github-languages?username={login}&theme={mode}&size={size}"
     return [
         f"**{card}** · {mode} · {size}",
         "",
