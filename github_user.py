@@ -97,7 +97,7 @@ def languages(login):
     for repo in repos:
         totals.update(_gh([f"repos/{repo['full_name']}/languages"]))
     grand = sum(totals.values()) or 1
-    rows = [(name, round(100 * amount / grand, 1)) for name, amount in totals.most_common(5)]
+    rows = [(name, round(100 * amount / grand, 1)) for name, amount in totals.most_common(8)]
     return {"languages": rows or [["No languages", 0]]}
 
 
