@@ -19,7 +19,7 @@ def render(mode, size, data, border=True):
         return _columns(mode, colors, data, rows, border)
     if size == "wide":
         return _lead(mode, colors, data, rows, 896, 240, border)
-    return _lead(mode, colors, data, rows, 440, 248, border)
+    return _lead(mode, colors, data, rows, 408, 248, border)
 
 
 def _pct(share):
