@@ -28,7 +28,7 @@ https://github.com/itsrealkaran/nothing-github-languages?username=itsrealkaran
 ![languages](https://github.com/itsrealkaran/nothing-github-languages?username=itsrealkaran)
 ```
 
-Leave `theme` and `size` off for the classic regular card. An unknown username, theme, or size still returns an SVG, so the image slot in a README stays intact.
+Leave `theme` and `size` off for the classic regular card. It has a hairline border and a small corner. An unknown username, theme, or size still returns an SVG, so the image slot in a README stays intact.
 
 ## Themes
 
@@ -51,7 +51,7 @@ The title is a dot grid. Labels are monospace. Shares under 0.1% print two decim
 | --- | --- | --- |
 | `mini` | 220×228 | Five languages. The lead bar is full width. |
 | `compact` | 495px wide | Ten languages in two columns, each with a bar. |
-| `regular` | 495×248 | The lead figure, then the other nine in a list. Default. |
+| `regular` | 440×248 | The lead figure, then the other nine in a list. Default. |
 | `wide` | 896×240 | The lead figure, then nine languages in two columns with short bars. |
 
 The files in `dist/` use the theme name, then the size: `classic-regular.svg`.
@@ -63,6 +63,7 @@ The files in `dist/` use the theme name, then the size: `classic-regular.svg`.
 | `username` | yes |  | GitHub login. `user` is the same parameter. |
 | `theme` | no | `classic` | One of the themes above. |
 | `size` | no | `regular` | One of the sizes above. |
+| `border` | no | `1` | `0` removes the border and uses the rounder corner. |
 
 ## Examples
 

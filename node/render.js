@@ -4,14 +4,14 @@ const { dots, label, openSvg } = require("./frame");
 const { theme } = require("./nothing");
 const { add, div, f, fixed, mul, pyRound } = require("./format");
 
-function render(mode, size, data) {
+function render(mode, size, data, border = true) {
   const colors = theme(mode);
   const rows = (data.languages || []).slice(0, 10);
   const list = rows.length ? rows : [["No languages", 0]];
-  if (size === "mini") return mini(mode, colors, data, list.slice(0, 5));
-  if (size === "compact") return columns(mode, colors, data, list);
-  if (size === "wide") return lead(mode, colors, data, list, 896, 240);
-  return lead(mode, colors, data, list, 495, 248);
+  if (size === "mini") return mini(mode, colors, data, list.slice(0, 5), border);
+  if (size === "compact") return columns(mode, colors, data, list, border);
+  if (size === "wide") return lead(mode, colors, data, list, 896, 240, border);
+  return lead(mode, colors, data, list, 440, 248, border);
 }
 
 function pct(share) {
@@ -28,12 +28,12 @@ function shareBar(x, y, track, share, colors) {
   );
 }
 
-function mini(mode, colors, data, rows) {
+function mini(mode, colors, data, rows, border) {
   const [leadName, share] = rows[0];
   const rest = rows.slice(1);
   const [name] = dots("LANGUAGES", 28, 12, colors.fg, 1.15);
   const parts = [
-    openSvg(mode, 220, 228, data.login + " languages", 6, 14),
+    openSvg(mode, 220, 228, data.login + " languages", 6, 14, border),
     name,
     label(14, 78, pct(share).replace(/%$/, ""), colors.figure, 28, -0.8),
     label(14, 96, leadName, colors.muted, 11, 0.2),
@@ -49,7 +49,7 @@ function mini(mode, colors, data, rows) {
   return parts.join("\n");
 }
 
-function columns(mode, colors, data, rows) {
+function columns(mode, colors, data, rows, border) {
   const margin = 20;
   const gap = 28;
   const width = 495;
@@ -59,7 +59,7 @@ function columns(mode, colors, data, rows) {
   const top = 68;
   const height = top + per * pitch + 6;
   const [name] = dots("LANGUAGES", margin + 16, 16, colors.fg, 1.8);
-  const parts = [openSvg(mode, width, height, data.login + " languages"), name];
+  const parts = [openSvg(mode, width, height, data.login + " languages", 8, 20, border), name];
   rows.forEach(([lang, share], index) => {
     const column = Math.floor(index / per);
     const row = index % per;
@@ -73,14 +73,14 @@ function columns(mode, colors, data, rows) {
   return parts.join("\n");
 }
 
-function lead(mode, colors, data, rows, width, height) {
+function lead(mode, colors, data, rows, width, height, border) {
   const [leadName, share] = rows[0];
   const rest = rows.slice(1);
   const wide = width > 600;
   const [name] = dots("LANGUAGES", 36, 16, colors.fg, 1.8);
   const number = wide ? 52 : 40;
   const parts = [
-    openSvg(mode, width, height, data.login + " languages"),
+    openSvg(mode, width, height, data.login + " languages", 8, 20, border),
     name,
     label(20, wide ? 118 : 112, pct(share).replace(/%$/, ""), colors.figure, number, -1.2),
     label(20, wide ? 146 : 136, leadName, colors.muted, 13, 0.2),
