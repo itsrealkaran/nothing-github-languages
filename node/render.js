@@ -11,7 +11,7 @@ function render(mode, size, data, border = true) {
   if (size === "mini") return mini(mode, colors, data, list.slice(0, 5), border);
   if (size === "compact") return columns(mode, colors, data, list, border);
   if (size === "wide") return lead(mode, colors, data, list, 896, 240, border);
-  return lead(mode, colors, data, list, 440, 248, border);
+  return lead(mode, colors, data, list, 408, 248, border);
 }
 
 function pct(share) {
