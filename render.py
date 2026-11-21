@@ -10,16 +10,16 @@ from nothing import MODES, SIZES, theme
 ROOT = Path(__file__).resolve().parent
 
 
-def render(mode, size, data):
+def render(mode, size, data, border=True):
     colors = theme(mode)
     rows = data["languages"][:10] or [["No languages", 0]]
     if size == "mini":
-        return _mini(mode, colors, data, rows[:5])
+        return _mini(mode, colors, data, rows[:5], border)
     if size == "compact":
-        return _columns(mode, colors, data, rows)
+        return _columns(mode, colors, data, rows, border)
     if size == "wide":
-        return _lead(mode, colors, data, rows, 896, 240)
-    return _lead(mode, colors, data, rows, 495, 248)
+        return _lead(mode, colors, data, rows, 896, 240, border)
+    return _lead(mode, colors, data, rows, 440, 248, border)
 
 
 def _pct(share):
@@ -38,12 +38,12 @@ def _share_bar(x, y, track, share, colors):
     )
 
 
-def _mini(mode, colors, data, rows):
+def _mini(mode, colors, data, rows, border):
     lead, share = rows[0]
     rest = rows[1:]
     name, _ = dots("LANGUAGES", 28, 12, colors["fg"], scale=1.15)
     parts = [
-        open_svg(mode, 220, 228, f"{data['login']} languages", mark=6, margin=14),
+        open_svg(mode, 220, 228, f"{data['login']} languages", mark=6, margin=14, border=border),
         name,
         label(14, 78, _pct(share).rstrip("%"), colors["figure"], 28, -0.8),
         label(14, 96, lead, colors["muted"], 11, 0.2),
@@ -58,7 +58,7 @@ def _mini(mode, colors, data, rows):
     return "\n".join(parts)
 
 
-def _columns(mode, colors, data, rows):
+def _columns(mode, colors, data, rows, border):
     """Ten languages, two columns. The bar under each name is that language's share."""
     margin = 20
     gap = 28
@@ -69,7 +69,7 @@ def _columns(mode, colors, data, rows):
     top = 68
     height = top + per * pitch + 6
     name, _ = dots("LANGUAGES", margin + 16, 16, colors["fg"], scale=1.8)
-    parts = [open_svg(mode, width, height, f"{data['login']} languages"), name]
+    parts = [open_svg(mode, width, height, f"{data['login']} languages", border=border), name]
     for index, (lang, share) in enumerate(rows):
         column = index // per
         row = index % per
@@ -82,7 +82,7 @@ def _columns(mode, colors, data, rows):
     return "\n".join(parts)
 
 
-def _lead(mode, colors, data, rows, width, height):
+def _lead(mode, colors, data, rows, width, height, border):
     """The first language is the figure. The rest sit in rows beside it."""
     lead, share = rows[0]
     rest = rows[1:]
@@ -90,7 +90,7 @@ def _lead(mode, colors, data, rows, width, height):
     name, _ = dots("LANGUAGES", 36, 16, colors["fg"], scale=1.8)
     number = 52 if wide else 40
     parts = [
-        open_svg(mode, width, height, f"{data['login']} languages"),
+        open_svg(mode, width, height, f"{data['login']} languages", border=border),
         name,
         label(20, 118 if wide else 112, _pct(share).rstrip("%"), colors["figure"], number, -1.2),
         label(20, 146 if wide else 136, lead, colors["muted"], 13, 0.2),
